@@ -15,7 +15,7 @@ export const createSubscription = async (req, res, next) => {
 
 export const getUserSubscription = async (req, res, next) => {
   try {
-    if (req.user.id !== req.params.id) {
+    if (req.user.id !== req.params.userId) {
       const error = new Error("You are not the owner of this subscription");
       error.statusCode = 401;
       throw error;
