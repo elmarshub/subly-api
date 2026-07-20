@@ -40,9 +40,9 @@ export const generateEmailTemplate = ({
                     </tr>
                 </table>
                 
-                <p style="font-size: 16px; margin-bottom: 25px;">If you'd like to make changes or cancel your subscription, please visit your <a href="${accountSettingsLink}" style="color: #4a90e2; text-decoration: none;">account settings</a> before the renewal date.</p>
+                <p style="font-size: 16px; margin-bottom: 25px;">If you'd like to make changes or cancel your subscription${accountSettingsLink ? `, please visit your <a href="${accountSettingsLink}" style="color: #4a90e2; text-decoration: none;">account settings</a>` : ""} before the renewal date.</p>
                 
-                <p style="font-size: 16px; margin-top: 30px;">Need help? <a href="${supportLink}" style="color: #4a90e2; text-decoration: none;">Contact our support team</a> anytime.</p>
+                <p style="font-size: 16px; margin-top: 30px;">Need help?${supportLink ? ` <a href="${supportLink}" style="color: #4a90e2; text-decoration: none;">Contact our support team</a> anytime.` : " Contact our support team anytime."}</p>
                 
                 <p style="font-size: 16px; margin-top: 30px;">
                     Best regards,<br>

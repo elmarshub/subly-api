@@ -43,12 +43,6 @@ export const sendReminders = serve(async (context) => {
         subscription,
       );
     }
-
-    await triggerReminder(
-      context,
-      `${daysBefore} days before reminder`,
-      subscription,
-    );
   }
 });
 

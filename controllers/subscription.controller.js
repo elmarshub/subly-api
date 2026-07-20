@@ -17,7 +17,6 @@ export const createSubscription = async (req, res, next) => {
       headers: {
         "content-type": "application/json",
       },
-      retries: 0,
     });
 
     res
@@ -52,7 +51,16 @@ export const getSubscriptionById = async (req, res, next) => {
       throw error;
     }
 
-    const subscription = await Subscription.findById(req.params.id);
+    const subscription = await Subscription.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+
+    if (!subscription) {
+      const error = new Error("Subscription not found");
+      error.statusCode = 404;
+      throw error;
+    }
 
     res.status(200).json({ success: true, data: subscription });
   } catch (error) {
