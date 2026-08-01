@@ -42,7 +42,7 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next): any => {
 
   return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
-    message: err?.message || "Server error",
+    message: "Server error",
   });
 };
 

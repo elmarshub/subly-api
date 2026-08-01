@@ -29,6 +29,8 @@ const userSchema = new mongoose.Schema(
 export type UserDocument = mongoose.InferSchemaType<typeof userSchema> &
   mongoose.Document;
 
-const UserModel = mongoose.model("User", userSchema);
+const UserModel =
+  (mongoose.models.User as mongoose.Model<UserDocument>) ??
+  mongoose.model("User", userSchema);
 
 export default UserModel;

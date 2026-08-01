@@ -56,12 +56,12 @@ export const sendReminderEmail = async ({
   const subject = template.generateSubject(mailInfo);
   const html = template.generateBody(mailInfo);
 
-  await transporter.sendMail({
+  const info = await transporter.sendMail({
     from: accountEmail,
     to,
     subject,
     html,
   });
 
-  console.log(`Email sent to ${to}`);
+  console.log(`Reminder email sent (messageId: ${info.messageId})`);
 };

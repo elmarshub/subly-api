@@ -23,7 +23,7 @@ const subscriptionSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: [true, "Subscription price is required"],
-      min: [0, "Subscription price must be greater than 0"],
+      min: [0, "Subscription price must be at least 0"],
     },
     currency: {
       type: String,
@@ -62,22 +62,40 @@ const subscriptionSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    // Upstash QStash workflow run id for the active reminder schedule —
+    // internal bookkeeping, never client-settable.
+    workflowRunId: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
 
+// Adds `months` to `date`, clamping to the last day of the target month so
+// e.g. Jan 31 + 1 month lands on Feb 28/29 instead of overflowing to Mar.
+function addMonthsClamped(date: Date, months: number): Date {
+  const day = date.getDate();
+  const result = new Date(date);
+  result.setDate(1);
+  result.setMonth(result.getMonth() + months);
+
+  const lastDayOfTargetMonth = new Date(
+    result.getFullYear(),
+    result.getMonth() + 1,
+    0,
+  ).getDate();
+  result.setDate(Math.min(day, lastDayOfTargetMonth));
+
+  return result;
+}
+
 // Auto-calculate the renewal date from the billing cycle if it wasn't provided.
 subscriptionSchema.pre("save", function () {
   if (!this.renewalDate) {
-    const renewal = new Date(this.startDate);
-
-    if (this.billing === "Yearly") {
-      renewal.setFullYear(renewal.getFullYear() + 1);
-    } else {
-      renewal.setMonth(renewal.getMonth() + 1);
-    }
-
-    this.renewalDate = renewal;
+    this.renewalDate = addMonthsClamped(
+      this.startDate,
+      this.billing === "Yearly" ? 12 : 1,
+    );
   }
 });
 
@@ -86,6 +104,8 @@ export type SubscriptionDocument = mongoose.InferSchemaType<
 > &
   mongoose.Document;
 
-const SubscriptionModel = mongoose.model("Subscription", subscriptionSchema);
+const SubscriptionModel =
+  (mongoose.models.Subscription as mongoose.Model<SubscriptionDocument>) ??
+  mongoose.model("Subscription", subscriptionSchema);
 
 export default SubscriptionModel;

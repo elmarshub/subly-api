@@ -16,4 +16,8 @@ export class WorkflowService {
 
     return workflowRunId;
   }
+
+  async cancelReminder(workflowRunId: string) {
+    return this.client.cancel(workflowRunId);
+  }
 }

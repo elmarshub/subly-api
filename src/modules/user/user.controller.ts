@@ -11,7 +11,10 @@ export class UserController {
   });
 
   getUser = asyncHandler(async (req: Request, res: Response) => {
-    const user = await userService.findById(req.params.id as string);
+    const user = await userService.findById(
+      req.params.id as string,
+      req.userId!,
+    );
 
     if (!user) {
       throw new AppError("User not found", HTTPSTATUS.NOT_FOUND);

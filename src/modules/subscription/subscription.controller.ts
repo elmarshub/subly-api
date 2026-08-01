@@ -11,9 +11,22 @@ export class SubscriptionController {
       req.userId!,
       req.body,
     );
-    const workflowRunId = await workflowService.triggerReminder(
-      subscription.id,
-    );
+
+    // Reminder scheduling is best-effort: a QStash outage shouldn't block
+    // subscription creation. The workflow can be (re)triggered later.
+    let workflowRunId: string | undefined;
+    try {
+      workflowRunId = await workflowService.triggerReminder(subscription.id);
+      await subscriptionService.setWorkflowRunId(
+        subscription.id,
+        workflowRunId,
+      );
+    } catch (error) {
+      console.error(
+        `Failed to schedule reminder workflow for subscription ${subscription.id}`,
+        error,
+      );
+    }
 
     res
       .status(HTTPSTATUS.CREATED)
@@ -50,6 +63,15 @@ export class SubscriptionController {
   });
 
   update = asyncHandler(async (req: Request, res: Response) => {
+    const existing = await subscriptionService.findByIdForUser(
+      req.params.id as string,
+      req.userId!,
+    );
+
+    if (!existing) {
+      throw new AppError("Subscription not found", HTTPSTATUS.NOT_FOUND);
+    }
+
     const subscription = await subscriptionService.updateForUser(
       req.params.id as string,
       req.userId!,
@@ -58,6 +80,29 @@ export class SubscriptionController {
 
     if (!subscription) {
       throw new AppError("Subscription not found", HTTPSTATUS.NOT_FOUND);
+    }
+
+    const renewalDateChanged =
+      subscription.renewalDate?.getTime() !== existing.renewalDate?.getTime();
+
+    if (renewalDateChanged) {
+      try {
+        if (existing.workflowRunId) {
+          await workflowService.cancelReminder(existing.workflowRunId);
+        }
+        const workflowRunId = await workflowService.triggerReminder(
+          subscription.id,
+        );
+        await subscriptionService.setWorkflowRunId(
+          subscription.id,
+          workflowRunId,
+        );
+      } catch (error) {
+        console.error(
+          `Failed to reschedule reminder workflow for subscription ${subscription.id}`,
+          error,
+        );
+      }
     }
 
     res.status(HTTPSTATUS.OK).json({ success: true, data: subscription });
