@@ -15,10 +15,7 @@ const basePath = appConfig.BASE_PATH;
 
 app.use(helmet());
 
-// Mounted before express.json() and before clerkMiddleware/arcjet: this route
-// needs the raw request body for Svix signature verification, and it's a
-// server-to-server call from Clerk with no Clerk session to check.
-app.use(`${basePath}/webhooks`, webhookRoutes);
+app.use(`${basePath}/webhooks`, arcjetMiddleware, webhookRoutes);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

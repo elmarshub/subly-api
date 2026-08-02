@@ -5,17 +5,7 @@ import { AppError } from "../../common/utils/AppError.js";
 import { HTTPSTATUS } from "../../config/http.config.js";
 import appConfig from "../../config/app.config.js";
 import { userService } from "../user/user.module.js";
-
-interface ClerkWebhookEvent {
-  type: string;
-  data: {
-    id: string;
-    first_name?: string | null;
-    last_name?: string | null;
-    email_addresses?: { id: string; email_address: string }[];
-    primary_email_address_id?: string | null;
-  };
-}
+import { clerkWebhookEventSchema } from "../../common/validators/webhook.schema.js";
 
 export const handleClerkWebhook = asyncHandler(
   async (req: Request, res: Response) => {
@@ -29,18 +19,23 @@ export const handleClerkWebhook = asyncHandler(
 
     const webhook = new Webhook(appConfig.CLERK.WEBHOOK_SIGNING_SECRET);
 
-    let event: ClerkWebhookEvent;
+    let verified: unknown;
     try {
-      event = webhook.verify(req.body as Buffer, {
+      verified = webhook.verify(req.body as Buffer, {
         "svix-id": svixId,
         "svix-timestamp": svixTimestamp,
         "svix-signature": svixSignature,
-      }) as ClerkWebhookEvent;
+      });
     } catch {
       throw new AppError("Invalid webhook signature", HTTPSTATUS.UNAUTHORIZED);
     }
 
-    const { type, data } = event;
+    const parsed = clerkWebhookEventSchema.safeParse(verified);
+    if (!parsed.success) {
+      throw new AppError("Invalid webhook payload", HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const { type, data } = parsed.data;
 
     if (type === "user.created" || type === "user.updated") {
       const emailAddresses = data.email_addresses ?? [];

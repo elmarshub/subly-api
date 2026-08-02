@@ -2,7 +2,10 @@ import { Router } from "express";
 import { subscriptionController } from "./subscription.module.js";
 import { requireClerkAuth } from "../../middlewares/clerkAuth.middleware.js";
 import { validate } from "../../middlewares/validate.middleware.js";
-import { createSubscriptionSchema } from "./subscription.schema.js";
+import {
+  createSubscriptionSchema,
+  updateSubscriptionSchema,
+} from "../../common/validators/subscription.schema.js";
 
 const subscriptionRoutes = Router();
 
@@ -19,7 +22,11 @@ subscriptionRoutes.post(
   validate(createSubscriptionSchema),
   subscriptionController.create,
 );
-subscriptionRoutes.put("/:id", subscriptionController.update);
+subscriptionRoutes.put(
+  "/:id",
+  validate(updateSubscriptionSchema),
+  subscriptionController.update,
+);
 subscriptionRoutes.put("/:id/cancel", subscriptionController.cancel);
 subscriptionRoutes.delete("/:id", subscriptionController.delete);
 

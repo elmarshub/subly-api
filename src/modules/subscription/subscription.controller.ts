@@ -4,7 +4,7 @@ import { AppError } from "../../common/utils/AppError.js";
 import { HTTPSTATUS } from "../../config/http.config.js";
 import { subscriptionService } from "./subscription.module.js";
 import { workflowService } from "../workflow/workflow.module.js";
-import { toSubscriptionDto } from "./subscription.dto.js";
+import { toSubscriptionDto } from "../../common/interfaces/subscription.dto.js";
 
 export class SubscriptionController {
   create = asyncHandler(async (req: Request, res: Response) => {
