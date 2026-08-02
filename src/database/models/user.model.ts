@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-// Identity (password, sign-in, sessions) lives in Clerk. This table just
-// mirrors the bits of a Clerk user we need to join against locally.
 const userSchema = new mongoose.Schema(
   {
     clerkId: {

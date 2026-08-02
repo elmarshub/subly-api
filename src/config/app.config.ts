@@ -18,6 +18,7 @@ const appConfig = () => {
     SERVER_URL,
     CLERK: {
       SECRET_KEY: getEnv("CLERK_SECRET_KEY"),
+      WEBHOOK_SIGNING_SECRET: getEnv("CLERK_WEBHOOK_SIGNING_SECRET"),
     },
     ARCJET: {
       KEY: getEnv("ARCJET_KEY"),

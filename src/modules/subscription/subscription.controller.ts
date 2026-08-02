@@ -4,6 +4,7 @@ import { AppError } from "../../common/utils/AppError.js";
 import { HTTPSTATUS } from "../../config/http.config.js";
 import { subscriptionService } from "./subscription.module.js";
 import { workflowService } from "../workflow/workflow.module.js";
+import { toSubscriptionDto } from "../../common/interfaces/subscription.dto.js";
 
 export class SubscriptionController {
   create = asyncHandler(async (req: Request, res: Response) => {
@@ -12,8 +13,6 @@ export class SubscriptionController {
       req.body,
     );
 
-    // Reminder scheduling is best-effort: a QStash outage shouldn't block
-    // subscription creation. The workflow can be (re)triggered later.
     let workflowRunId: string | undefined;
     try {
       workflowRunId = await workflowService.triggerReminder(subscription.id);
@@ -30,14 +29,14 @@ export class SubscriptionController {
 
     res
       .status(HTTPSTATUS.CREATED)
-      .json({ success: true, data: { subscription, workflowRunId } });
+      .json({ success: true, data: toSubscriptionDto(subscription) });
   });
 
   getAllForUser = asyncHandler(async (req: Request, res: Response) => {
-    const subscriptions = await subscriptionService.findAllForUser(
-      req.userId!,
-    );
-    res.status(HTTPSTATUS.OK).json({ success: true, data: subscriptions });
+    const subscriptions = await subscriptionService.findAllForUser(req.userId!);
+    res
+      .status(HTTPSTATUS.OK)
+      .json({ success: true, data: subscriptions.map(toSubscriptionDto) });
   });
 
   getUpcoming = asyncHandler(async (req: Request, res: Response) => {
@@ -46,7 +45,9 @@ export class SubscriptionController {
       req.userId!,
       days,
     );
-    res.status(HTTPSTATUS.OK).json({ success: true, data: subscriptions });
+    res
+      .status(HTTPSTATUS.OK)
+      .json({ success: true, data: subscriptions.map(toSubscriptionDto) });
   });
 
   getById = asyncHandler(async (req: Request, res: Response) => {
@@ -59,7 +60,9 @@ export class SubscriptionController {
       throw new AppError("Subscription not found", HTTPSTATUS.NOT_FOUND);
     }
 
-    res.status(HTTPSTATUS.OK).json({ success: true, data: subscription });
+    res
+      .status(HTTPSTATUS.OK)
+      .json({ success: true, data: toSubscriptionDto(subscription) });
   });
 
   update = asyncHandler(async (req: Request, res: Response) => {
@@ -105,7 +108,9 @@ export class SubscriptionController {
       }
     }
 
-    res.status(HTTPSTATUS.OK).json({ success: true, data: subscription });
+    res
+      .status(HTTPSTATUS.OK)
+      .json({ success: true, data: toSubscriptionDto(subscription) });
   });
 
   cancel = asyncHandler(async (req: Request, res: Response) => {
@@ -118,7 +123,9 @@ export class SubscriptionController {
       throw new AppError("Subscription not found", HTTPSTATUS.NOT_FOUND);
     }
 
-    res.status(HTTPSTATUS.OK).json({ success: true, data: subscription });
+    res
+      .status(HTTPSTATUS.OK)
+      .json({ success: true, data: toSubscriptionDto(subscription) });
   });
 
   delete = asyncHandler(async (req: Request, res: Response) => {
@@ -131,6 +138,8 @@ export class SubscriptionController {
       throw new AppError("Subscription not found", HTTPSTATUS.NOT_FOUND);
     }
 
-    res.status(HTTPSTATUS.OK).json({ success: true, data: subscription });
+    res
+      .status(HTTPSTATUS.OK)
+      .json({ success: true, data: toSubscriptionDto(subscription) });
   });
 }
