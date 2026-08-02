@@ -12,8 +12,6 @@ export class SubscriptionController {
       req.body,
     );
 
-    // Reminder scheduling is best-effort: a QStash outage shouldn't block
-    // subscription creation. The workflow can be (re)triggered later.
     let workflowRunId: string | undefined;
     try {
       workflowRunId = await workflowService.triggerReminder(subscription.id);
@@ -34,9 +32,7 @@ export class SubscriptionController {
   });
 
   getAllForUser = asyncHandler(async (req: Request, res: Response) => {
-    const subscriptions = await subscriptionService.findAllForUser(
-      req.userId!,
-    );
+    const subscriptions = await subscriptionService.findAllForUser(req.userId!);
     res.status(HTTPSTATUS.OK).json({ success: true, data: subscriptions });
   });
 

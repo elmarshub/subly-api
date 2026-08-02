@@ -1,7 +1,5 @@
 import SubscriptionModel from "../../database/models/subscription.model.js";
 
-// Fields a client is allowed to set via update — excludes internal
-// bookkeeping like userId/workflowRunId to prevent mass assignment.
 const EDITABLE_FIELDS = [
   "name",
   "price",
