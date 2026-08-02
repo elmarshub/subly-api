@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { subscriptionController } from "./subscription.module.js";
 import { requireClerkAuth } from "../../middlewares/clerkAuth.middleware.js";
+import { validate } from "../../middlewares/validate.middleware.js";
+import { createSubscriptionSchema } from "./subscription.schema.js";
 
 const subscriptionRoutes = Router();
 
@@ -12,7 +14,11 @@ subscriptionRoutes.get(
   subscriptionController.getUpcoming,
 );
 subscriptionRoutes.get("/:id", subscriptionController.getById);
-subscriptionRoutes.post("/", subscriptionController.create);
+subscriptionRoutes.post(
+  "/",
+  validate(createSubscriptionSchema),
+  subscriptionController.create,
+);
 subscriptionRoutes.put("/:id", subscriptionController.update);
 subscriptionRoutes.put("/:id/cancel", subscriptionController.cancel);
 subscriptionRoutes.delete("/:id", subscriptionController.delete);

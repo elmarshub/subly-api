@@ -1,4 +1,5 @@
 import SubscriptionModel from "../../database/models/subscription.model.js";
+import type { CreateSubscriptionInput } from "./subscription.schema.js";
 
 const EDITABLE_FIELDS = [
   "name",
@@ -13,7 +14,7 @@ const EDITABLE_FIELDS = [
 ] as const;
 
 export class SubscriptionService {
-  async create(userId: string, data: Record<string, unknown>) {
+  async create(userId: string, data: CreateSubscriptionInput) {
     return SubscriptionModel.create({ ...data, userId });
   }
 

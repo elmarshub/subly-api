@@ -8,11 +8,18 @@ import { arcjetMiddleware } from "./middlewares/arcjet.middleware.js";
 import userRoutes from "./modules/user/user.routes.js";
 import subscriptionRoutes from "./modules/subscription/subscription.routes.js";
 import workflowRoutes from "./modules/workflow/workflow.routes.js";
+import webhookRoutes from "./modules/webhooks/clerk.routes.js";
 
 const app = express();
 const basePath = appConfig.BASE_PATH;
 
 app.use(helmet());
+
+// Mounted before express.json() and before clerkMiddleware/arcjet: this route
+// needs the raw request body for Svix signature verification, and it's a
+// server-to-server call from Clerk with no Clerk session to check.
+app.use(`${basePath}/webhooks`, webhookRoutes);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(clerkMiddleware());

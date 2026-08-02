@@ -10,9 +10,29 @@ export class UserService {
       .limit(MAX_USERS_PAGE_SIZE);
   }
 
-  // Scoped to the requesting Clerk user — prevents one account from reading
-  // another user's record by guessing/enumerating Mongo _ids.
   async findById(id: string, requesterClerkId: string) {
     return UserModel.findOne({ _id: id, clerkId: requesterClerkId });
+  }
+
+  async upsertFromClerk(clerkId: string, name: string, email: string) {
+    const update = { clerkId, name, email };
+    const options = {
+      upsert: true,
+      returnDocument: "after" as const,
+      runValidators: true,
+    };
+
+    try {
+      return await UserModel.findOneAndUpdate({ clerkId }, update, options);
+    } catch (error) {
+      if ((error as { code?: number }).code === 11000) {
+        return UserModel.findOneAndUpdate({ clerkId }, update, options);
+      }
+      throw error;
+    }
+  }
+
+  async deleteByClerkId(clerkId: string) {
+    return UserModel.findOneAndDelete({ clerkId });
   }
 }
