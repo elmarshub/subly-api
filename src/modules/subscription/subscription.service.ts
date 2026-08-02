@@ -1,21 +1,11 @@
 import SubscriptionModel from "../../database/models/subscription.model.js";
-
-// Fields a client is allowed to set via update — excludes internal
-// bookkeeping like userId/workflowRunId to prevent mass assignment.
-const EDITABLE_FIELDS = [
-  "name",
-  "price",
-  "currency",
-  "billing",
-  "category",
-  "paymentMethod",
-  "status",
-  "startDate",
-  "renewalDate",
-] as const;
+import type {
+  CreateSubscriptionInput,
+  UpdateSubscriptionInput,
+} from "../../common/validators/subscription.schema.js";
 
 export class SubscriptionService {
-  async create(userId: string, data: Record<string, unknown>) {
+  async create(userId: string, data: CreateSubscriptionInput) {
     return SubscriptionModel.create({ ...data, userId });
   }
 
@@ -30,14 +20,9 @@ export class SubscriptionService {
   async updateForUser(
     id: string,
     userId: string,
-    data: Record<string, unknown>,
+    data: UpdateSubscriptionInput,
   ) {
-    const update: Record<string, unknown> = {};
-    for (const field of EDITABLE_FIELDS) {
-      if (data[field] !== undefined) update[field] = data[field];
-    }
-
-    return SubscriptionModel.findOneAndUpdate({ _id: id, userId }, update, {
+    return SubscriptionModel.findOneAndUpdate({ _id: id, userId }, data, {
       new: true,
       runValidators: true,
     });

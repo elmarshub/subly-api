@@ -8,11 +8,15 @@ import { arcjetMiddleware } from "./middlewares/arcjet.middleware.js";
 import userRoutes from "./modules/user/user.routes.js";
 import subscriptionRoutes from "./modules/subscription/subscription.routes.js";
 import workflowRoutes from "./modules/workflow/workflow.routes.js";
+import webhookRoutes from "./modules/webhooks/clerk.routes.js";
 
 const app = express();
 const basePath = appConfig.BASE_PATH;
 
 app.use(helmet());
+
+app.use(`${basePath}/webhooks`, arcjetMiddleware, webhookRoutes);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(clerkMiddleware());

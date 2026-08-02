@@ -56,14 +56,12 @@ const subscriptionSchema = new mongoose.Schema(
     renewalDate: {
       type: Date,
     },
-    // Clerk user id — not a Mongo ref, since the user's identity lives in Clerk.
     userId: {
       type: String,
       required: true,
       index: true,
     },
-    // Upstash QStash workflow run id for the active reminder schedule —
-    // internal bookkeeping, never client-settable.
+
     workflowRunId: {
       type: String,
     },
@@ -71,8 +69,6 @@ const subscriptionSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Adds `months` to `date`, clamping to the last day of the target month so
-// e.g. Jan 31 + 1 month lands on Feb 28/29 instead of overflowing to Mar.
 function addMonthsClamped(date: Date, months: number): Date {
   const day = date.getDate();
   const result = new Date(date);
@@ -89,7 +85,7 @@ function addMonthsClamped(date: Date, months: number): Date {
   return result;
 }
 
-// Auto-calculate the renewal date from the billing cycle if it wasn't provided.
+// auto-calculate the renewal date from the billing cycle if it wasn't provided.
 subscriptionSchema.pre("save", function () {
   if (!this.renewalDate) {
     this.renewalDate = addMonthsClamped(
